@@ -1,0 +1,108 @@
+---
+name: websearch
+description: "Perform web searches using various search engines and APIs. "
+metadata: { "openclaw": { "emoji": "🔍", "requires": { "bins": ["node","npm"] } } }
+---
+
+# Web Search Skill / 网络搜索技能
+
+Perform web searches using various search engines and APIs. This skill provides access to search functionality without requiring API keys for basic usage.
+
+使用各种搜索引擎和API进行网络搜索。此技能提供搜索功能访问，无需API密钥即可进行基本操作。
+
+## Features / 功能特性
+
+- **URL Content Extraction**: Read and extract content from any web page URL
+  **URL内容提取**: 从任意网页URL读取和提取内容
+- **Keyword Search**: Search for specific keywords and return specified number of results
+  **关键词搜索**: 搜索特定关键词并返回指定数量的结果
+- **Dependency Management**: Automatic dependency installation via npm
+  **依赖管理**: 通过npm自动安装依赖项
+
+## Basic Usage / 基础用法
+
+Read content from a specific URL:
+
+从特定URL读取内容：
+
+```bash
+node ./search.js https://www.example.com
+```
+
+**Output Format / 输出格式**:
+- Title / 标题
+- URL
+- Platform / 平台
+- Content length / 内容长度
+- Content preview / 内容预览
+
+## Advanced Usage / 高级用法
+
+Search with specific keyword and result limit:
+
+使用特定关键词和结果限制进行搜索：
+
+```bash
+node ./exasearch.js <keyword> [numResults]
+```
+
+**Parameters / 参数**:
+- `keyword`: Search query string (required)
+  搜索查询字符串（必需）
+- `numResults`: Number of results to return (optional, default: 10, max: 100)
+  返回结果数量（可选，默认：10，最大：100）
+
+**Examples / 示例**:
+
+```bash
+# Basic search with default 10 results
+# 默认10个结果的基础搜索
+node ./exasearch.js "artificial intelligence"
+
+# Search with 20 results
+# 搜索20个结果
+node ./exasearch.js "machine learning" 20
+
+# Search with 50 results
+# 搜索50个结果
+node ./exasearch.js "deep learning" 50
+```
+
+## Setup / 安装设置
+
+First-time setup requires installing dependencies:
+
+首次使用需要安装依赖：
+
+**Prerequisites / 前置要求**:
+- Node.js v22 or higher / Node.js v22 或更高版本
+- npm or yarn
+
+```bash
+npm install
+```
+
+**Dependencies / 依赖项**:
+- `axios`: HTTP client for web requests
+  HTTP客户端，用于网络请求
+- `mcporter`: Tool integration framework
+  工具集成框架
+
+## Error Handling / 错误处理
+
+The scripts include comprehensive error handling for:
+
+脚本包含全面的错误处理：
+
+- Missing required parameters / 缺少必需参数
+- Invalid parameter values / 无效参数值
+- Network connection errors / 网络连接错误
+- HTTP request failures / HTTP请求失败
+- Server timeout errors / 服务器超时错误
+
+## Technical Details / 技术细节
+
+- **Backend / 后端**: Jina Reader API (https://r.jina.ai)
+- **Timeout / 超时**: 15 seconds for web requests / 网络请求15秒
+- **Output Format / 输出格式**: JSON / Markdown
+- **Search Provider / 搜索提供商**: Exa API (via mcporter)
