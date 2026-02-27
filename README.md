@@ -37,13 +37,30 @@ Extract content from a specific URL:
 从特定URL提取内容：
 
 ```bash
-node search.js <url>
+node search.js <url> [previewLength]
 ```
 
-**Example / 示例**:
+**Parameters / 参数**:
+
+- `url`: The URL to read (required)
+  要读取的URL（必需）
+- `previewLength`: Number of characters to preview (optional, default: 200, use 0 to disable preview)
+  预览字符数（可选，默认：200，使用0禁用预览）
+
+**Examples / 示例**:
 
 ```bash
+# Default preview (200 characters)
+# 默认预览（200字符）
 node search.js https://www.example.com
+
+# Preview 500 characters
+# 预览500字符
+node search.js https://www.example.com 500
+
+# No preview (show only metadata)
+# 无预览（仅显示元数据）
+node search.js https://www.example.com 0
 ```
 
 **Output / 输出**:
@@ -60,7 +77,7 @@ Content length: 1256 characters
 First 200 characters of content:
 # Example Domain
 
-This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission...
+This domain is for use in illustrative examples...
 ```
 
 ### Search by Keyword / 关键词搜索

@@ -26,7 +26,29 @@ Read content from a specific URL:
 从特定URL读取内容：
 
 ```bash
+node ./search.js <url> [previewLength]
+```
+
+**Parameters / 参数**:
+- `url`: The URL to read (required)
+  要读取的URL（必需）
+- `previewLength`: Number of characters to preview (optional, default: 200, use 0 to disable preview)
+  预览字符数（可选，默认：200，使用0禁用预览）
+
+**Examples / 示例**:
+
+```bash
+# Default preview (200 characters)
+# 默认预览（200字符）
 node ./search.js https://www.example.com
+
+# Preview 500 characters
+# 预览500字符
+node ./search.js https://www.example.com 500
+
+# No preview (show only metadata)
+# 无预览（仅显示元数据）
+node ./search.js https://www.example.com 0
 ```
 
 **Output Format / 输出格式**:
@@ -34,7 +56,7 @@ node ./search.js https://www.example.com
 - URL
 - Platform / 平台
 - Content length / 内容长度
-- Content preview / 内容预览
+- Content preview / 内容预览（可选）
 
 ## Advanced Usage / 高级用法
 

@@ -47,9 +47,17 @@ class WebChannel {
 
 async function main() {
   const url = process.argv[2];
+  const previewLength = process.argv[3] ? parseInt(process.argv[3], 10) : 200;
   
   if (!url) {
-    console.error('Usage: node search.js <url>');
+    console.error('Usage: node search.js <url> [previewLength]');
+    console.error('  url: The URL to read');
+    console.error('  previewLength: Number of characters to preview (optional, default: 200)');
+    process.exit(1);
+  }
+
+  if (isNaN(previewLength) || previewLength < 0) {
+    console.error('Error: previewLength must be a non-negative integer');
     process.exit(1);
   }
 
@@ -64,8 +72,12 @@ async function main() {
     console.log(`URL: ${result.url}`);
     console.log(`Platform: ${result.platform}`);
     console.log(`Content length: ${result.content.length} characters`);
-    console.log('\nFirst 200 characters of content:');
-    console.log(result.content.substring(0, 200) + '...');
+    
+    if (previewLength > 0) {
+      console.log(`\nFirst ${previewLength} characters of content:`);
+      const preview = result.content.substring(0, previewLength);
+      console.log(preview + (result.content.length > previewLength ? '...' : ''));
+    }
     
   } catch (error) {
     console.error('Error reading web page:', error.message);
