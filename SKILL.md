@@ -128,3 +128,180 @@ The scripts include comprehensive error handling for:
 - **Timeout / 超时**: 15 seconds for web requests / 网络请求15秒
 - **Output Format / 输出格式**: JSON / Markdown
 - **Search Provider / 搜索提供商**: Exa API (via mcporter)
+
+## Logic Examples / 逻辑示例
+
+### ReadResult.js - Result Object Class
+
+```javascript
+export class ReadResult {
+  constructor(title, content, url, platform = "web") {
+    this.title = title;
+    this.content = content;
+    this.url = url;
+    this.platform = platform;
+  }
+
+  toDict() {
+    return {
+      title: this.title,
+      content: this.content,
+      url: this.url,
+      platform: this.platform
+    };
+  }
+}
+```
+
+### search.js - URL Content Extraction
+
+```javascript
+import axios from 'axios';
+import { ReadResult } from './ReadResult.js';
+
+class WebChannel {
+  constructor() {
+    this.JINA_URL = "https://r.jina.ai/";
+  }
+
+  async read(url) {
+    try {
+      const response = await axios.get(`${this.JINA_URL}${url}`, {
+        headers: {
+          'Accept': 'text/markdown'
+        },
+        timeout: 15000
+      });
+
+      const text = response.data;
+      let title = url;
+      const lines = text.split('\n');
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('# ')) {
+          title = trimmedLine.substring(2).trim();
+          break;
+        }
+        if (trimmedLine.startsWith('Title:')) {
+          title = trimmedLine.substring(6).trim();
+          break;
+        }
+      }
+
+      return new ReadResult(title, text, url, "web");
+
+    } catch (error) {
+      if (error.response) {
+        throw new Error(`HTTP ${error.response.status}: ${error.response.statusText}`);
+      } else if (error.request) {
+        throw new Error('Network error: No response received');
+      } else {
+        throw new Error(`Request failed: ${error.message}`);
+      }
+    }
+  }
+}
+
+async function main() {
+  const url = process.argv[2];
+  const previewLength = process.argv[3] ? parseInt(process.argv[3], 10) : 200;
+  
+  if (!url) {
+    console.error('Usage: node search.js <url> [previewLength]');
+    console.error('  url: The URL to read');
+    console.error('  previewLength: Number of characters to preview (optional, default: 200)');
+    process.exit(1);
+  }
+
+  if (isNaN(previewLength) || previewLength < 0) {
+    console.error('Error: previewLength must be a non-negative integer');
+    process.exit(1);
+  }
+
+  const webChannel = new WebChannel();
+  
+  try {
+    console.log(`Reading: ${url}`);
+    const result = await webChannel.read(url);
+    
+    console.log('\n=== Read Result ===');
+    console.log(`Title: ${result.title}`);
+    console.log(`URL: ${result.url}`);
+    console.log(`Platform: ${result.platform}`);
+    console.log(`Content length: ${result.content.length} characters`);
+    
+    if (previewLength > 0) {
+      console.log(`\nFirst ${previewLength} characters of content:`);
+      const preview = result.content.substring(0, previewLength);
+      console.log(preview + (result.content.length > previewLength ? '...' : ''));
+    }
+    
+  } catch (error) {
+    console.error('Error reading web page:', error.message);
+    process.exit(1);
+  }
+}
+
+main();
+```
+
+### exasearch.js - Keyword Search
+
+```javascript
+import { callOnce } from "mcporter";
+
+async function main() {
+  const keyword = process.argv[2];
+  const num = process.argv[3];
+
+  if (!keyword) {
+    console.error('Error: Search keyword is required');
+    console.error('Usage: node exasearch.js <keyword> [numResults]');
+    process.exit(1);
+  }
+
+  const numResults = num ? parseInt(num, 10) : 10;
+
+  if (isNaN(numResults) || numResults < 1) {
+    console.error('Error: numResults must be a positive integer');
+    process.exit(1);
+  }
+
+  if (numResults > 100) {
+    console.error('Error: numResults cannot exceed 100');
+    process.exit(1);
+  }
+
+  try {
+    console.log(`Searching for: ${keyword}`);
+    console.log(`Number of results: ${numResults}`);
+    
+    const result = await callOnce({
+      server: "exa",
+      toolName: "web_search_exa",
+      args: { query: keyword, numResults: numResults },
+    });
+
+    console.log('\n=== Search Results ===');
+    console.log(JSON.stringify(result, null, 2));
+    
+  } catch (error) {
+    console.error('Error during search:', error.message);
+    
+    if (error.response) {
+      console.error(`HTTP ${error.response.status}: ${error.response.statusText}`);
+    } else if (error.request) {
+      console.error('Network error: No response received from server');
+    } else if (error.code === 'ECONNREFUSED') {
+      console.error('Connection refused: Unable to reach the search server');
+    } else if (error.code === 'ETIMEDOUT') {
+      console.error('Request timeout: Server took too long to respond');
+    }
+    
+    process.exit(1);
+  }
+}
+
+main();
+```
